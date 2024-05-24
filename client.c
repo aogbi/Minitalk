@@ -6,35 +6,48 @@
 /*   By: aogbi <aogbi@student.1337.ma>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/17 16:56:13 by aogbi             #+#    #+#             */
-/*   Updated: 2024/05/17 22:45:20 by aogbi            ###   ########.fr       */
+/*   Updated: 2024/05/24 19:19:53 by aogbi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
 
-void send_message(pid_t server_pid, const char *message) {
-    while (*message) {
-        if (*message == '1') {
-            kill(server_pid, SIGUSR1);
-        } else if (*message == '0') {
-            kill(server_pid, SIGUSR2);
-        }
-        usleep(100);  // Small delay to ensure the signal is sent
-        message++;
-    }
-}
-
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s <server_pid> <message>\n", argv[0]);
-        return 1;
+	int 				i;
+	int 				pid = 0;
+
+    if (argc != 3)
+    {
+        ft_putstr_fd("Usage:./server [pid] [message]\n", 2);
+        return (1);
     }
-
-    pid_t server_pid = atoi(argv[1]);
-    const char *message = argv[2];
-
-    send_message(server_pid, message);
-
-    return 0;
+	i = 0;
+    while (ft_isdigit(argv[1][i]) || argv[1][i] == ' ')
+		i++;
+	if ((int)ft_strlen(argv[1]) == i)
+		pid = ft_atoi(argv[1]);
+	while(*argv[2])
+	{
+		i = 128;
+		int c = 0;
+		while(i)
+		{
+			if (*argv[2] >= i)
+			{
+				*argv[2] -= i;
+			    kill(pid, SIGUSR1);
+				c += i;
+				i /= 2;
+			}
+			else
+			{
+			    kill(pid, SIGUSR2);
+				i /= 2;
+			}
+			usleep(100);
+		}
+		(argv[2])++;
+	}
+    return (0);
 }

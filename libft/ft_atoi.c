@@ -6,7 +6,7 @@
 /*   By: aogbi <aogbi@student.1337.ma>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/02 18:19:32 by aogbi             #+#    #+#             */
-/*   Updated: 2024/05/04 21:50:11 by aogbi            ###   ########.fr       */
+/*   Updated: 2024/06/04 02:17:51 by aogbi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,10 @@ int	ft_atoi(const char *nptr)
 		result *= 10;
 		result += (*nptr++) - '0';
 	}
+	if (*(nptr - 1) == '-' || *(nptr - 1) == '+' || *nptr)
+		return (-1);
 	result *= signal;
 	if ((ssize_t)result > INT_MAX || (ssize_t)result < INT_MIN)
-		return (0);
+		return (-1);
 	return ((int)result);
 }

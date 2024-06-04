@@ -6,31 +6,59 @@
 /*   By: aogbi <aogbi@student.1337.ma>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/08 15:54:17 by aogbi             #+#    #+#             */
-/*   Updated: 2024/05/24 19:19:02 by aogbi            ###   ########.fr       */
+/*   Updated: 2024/06/04 06:56:00 by aogbi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-void signal_handler(int signal)
+int g_minitalk = 0;
+
+void write_minitalk(int *bitn, int *character)
+{
+	*bitn /= 2;
+	if (*bitn <= 0)
+	{
+		ft_printf("%c", *character);
+		*bitn = 128;
+		*character = 0;
+	}
+}
+
+void signal_handler(int signal, siginfo_t *info, void *context)
 {
 	static int character = 0;
 	static int bitn = 128;
 
+	context = NULL;
+	if (g_minitalk == 0)
+	    g_minitalk = info->si_pid;
+	if (g_minitalk != info->si_pid)
+	{
+		usleep(1000);
+		if (kill(g_minitalk, 0) == 0)
+		{
+			kill(info->si_pid, SIGUSR2);
+			return ;
+		}
+		g_minitalk = info->si_pid;
+		bitn = 128;
+		character = 0;
+	}
 	if (signal == SIGUSR1)
 	    character += bitn;
-	bitn /= 2;
-	if (bitn <= 0)
-	{
-		ft_printf("%c", character);
-		bitn = 128;
-        character = 0;
-	}
+	write_minitalk(&bitn, &character);
+	kill(info->si_pid, SIGUSR1);
 }
 
-int main() {
-	signal(SIGUSR1, signal_handler);
-	signal(SIGUSR2, signal_handler);
+int main()
+{
+	struct sigaction act;
+
+	act.sa_flags = SA_SIGINFO;
+    act.sa_sigaction = signal_handler;
+	sigaction(SIGUSR1, &act, NULL);
+	sigaction(SIGUSR2, &act, NULL);
 	ft_printf("\n\033[1;32m  ███╗   ███╗██╗███╗   ██╗██╗████████╗ █████╗ ██╗     ██╗ ██╗\n");
   	ft_printf("  ████╗ ████║██║████╗  ██║██║╚══██╔══╝██╔══██╗██║     ██║██╔╝\n");
 	ft_printf("  ██╔████╔██║██║██╔██╗ ██║██║   ██║   ███████║██║     ███╔╝ \n");
@@ -38,6 +66,7 @@ int main() {
 	ft_printf("  ██║ ╚═╝ ██║██║██║ ╚████║██║   ██║   ██║  ██║███████╗██╔═██╗\n");
 	ft_printf("  ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝ ╚═╝\n");
 	ft_printf("       ═════════════════ \033[1;35mpid = %d \033[1;32m═════════════════\033[0m\n", getpid());
-	while (1){}
+	while (1)
+		pause();
     return 0;
 }

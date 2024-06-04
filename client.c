@@ -6,37 +6,45 @@
 /*   By: aogbi <aogbi@student.1337.ma>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/17 16:56:13 by aogbi             #+#    #+#             */
-/*   Updated: 2024/05/24 19:19:53 by aogbi            ###   ########.fr       */
+/*   Updated: 2024/06/04 06:56:00 by aogbi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
+void	signal_handler(int seg)
+{
+    if(seg == SIGUSR2)
+	{
+		ft_printf("please wait ...\n");
+		exit(1);
+	}
+}
 
-int main(int argc, char *argv[]) {
-	int 				i;
-	int 				pid = 0;
+void    check_server(int pid)
+{
+	if (!usleep(10000) && kill(pid, 0) == -1)
+	{
+		ft_printf("this pid is killed\n");
+		exit (1);
+	}
+}
 
-    if (argc != 3)
-    {
-        ft_putstr_fd("Usage:./server [pid] [message]\n", 2);
-        return (1);
-    }
-	i = 0;
-    while (ft_isdigit(argv[1][i]) || argv[1][i] == ' ')
-		i++;
-	if ((int)ft_strlen(argv[1]) == i)
-		pid = ft_atoi(argv[1]);
-	while(*argv[2])
+void    send_message(int pid, char *message)
+{
+	int i;
+	int c;
+
+	while(*message)
 	{
 		i = 128;
-		int c = 0;
+		c = 0;
 		while(i)
 		{
-			if (*argv[2] >= i)
+			if (*message >= i)
 			{
-				*argv[2] -= i;
-			    kill(pid, SIGUSR1);
+				*message -= i;
+				kill(pid, SIGUSR1);
 				c += i;
 				i /= 2;
 			}
@@ -45,9 +53,29 @@ int main(int argc, char *argv[]) {
 			    kill(pid, SIGUSR2);
 				i /= 2;
 			}
-			usleep(100);
+			check_server(pid);
 		}
-		(argv[2])++;
+		message++;
 	}
+}
+
+int main(int argc, char *argv[])
+{
+	int 				pid = 0;
+
+	signal(SIGUSR1, signal_handler);
+	signal(SIGUSR2, signal_handler);
+    if (argc != 3)
+    {
+        ft_putstr_fd("Usage:./client [pid] [message]\n", 2);
+        return (1);
+    }
+	pid = ft_atoi(argv[1]);
+	if (pid <= 0 || kill(pid, 0) == -1)
+	{
+        ft_putstr_fd("[pid] error\n", 2);
+        return (1);
+    }
+	send_message(pid, argv[2]);
     return (0);
 }

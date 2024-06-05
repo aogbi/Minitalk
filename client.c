@@ -14,14 +14,14 @@
 
 void	signal_handler(int seg)
 {
-    if(seg == SIGUSR2)
+	if (seg == SIGUSR2)
 	{
 		ft_printf("please wait ...\n");
 		exit(1);
 	}
 }
 
-void    check_server(int pid)
+void	check_server(int pid)
 {
 	if (!usleep(10000) && kill(pid, 0) == -1)
 	{
@@ -30,52 +30,47 @@ void    check_server(int pid)
 	}
 }
 
-void    send_message(int pid, char *message)
+void	send_message(int pid, char *message)
 {
-	int i;
-	int c;
+	int	i;
+	int	c;
 
-	while(*message)
+	while (*message)
 	{
-		i = 128;
+		i = 8;
 		c = 0;
-		while(i)
+		while (i)
 		{
-			if (*message >= i)
-			{
-				*message -= i;
+			if ((*message & 128) == 128)
 				kill(pid, SIGUSR1);
-				c += i;
-				i /= 2;
-			}
 			else
-			{
-			    kill(pid, SIGUSR2);
-				i /= 2;
-			}
+				kill(pid, SIGUSR2);
+			*message = *message << 1;
+			i--;
 			check_server(pid);
 		}
 		message++;
 	}
 }
 
-int main(int argc, char *argv[])
+int	main(int argc, char *argv[])
 {
-	int 				pid = 0;
+	int	pid;
 
+	pid = 0;
 	signal(SIGUSR1, signal_handler);
 	signal(SIGUSR2, signal_handler);
-    if (argc != 3)
-    {
-        ft_putstr_fd("Usage:./client [pid] [message]\n", 2);
-        return (1);
-    }
+	if (argc != 3)
+	{
+		ft_putstr_fd("Usage:./client [pid] [message]\n", 2);
+		return (1);
+	}
 	pid = ft_atoi(argv[1]);
 	if (pid <= 0 || kill(pid, 0) == -1)
 	{
-        ft_putstr_fd("[pid] error\n", 2);
-        return (1);
-    }
+		ft_putstr_fd("[pid] error\n", 2);
+		return (1);
+	}
 	send_message(pid, argv[2]);
-    return (0);
+	return (0);
 }

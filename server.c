@@ -12,9 +12,9 @@
 
 #include "minitalk.h"
 
-int g_minitalk = 0;
+int	g_minitalk = 0;
 
-void write_minitalk(int *bitn, int *character)
+void	write_minitalk(int *bitn, int *character)
 {
 	*bitn /= 2;
 	if (*bitn <= 0)
@@ -25,14 +25,14 @@ void write_minitalk(int *bitn, int *character)
 	}
 }
 
-void signal_handler(int signal, siginfo_t *info, void *context)
+void	signal_handler(int signal, siginfo_t *info, void *context)
 {
-	static int character = 0;
-	static int bitn = 128;
+	static int	character = 0;
+	static int	bitn = 128;
 
 	context = NULL;
 	if (g_minitalk == 0)
-	    g_minitalk = info->si_pid;
+		g_minitalk = info->si_pid;
 	if (g_minitalk != info->si_pid)
 	{
 		usleep(1000);
@@ -46,27 +46,42 @@ void signal_handler(int signal, siginfo_t *info, void *context)
 		character = 0;
 	}
 	if (signal == SIGUSR1)
-	    character += bitn;
+		character += bitn;
 	write_minitalk(&bitn, &character);
 	kill(info->si_pid, SIGUSR1);
 }
 
-int main()
+void	makefile_str(void)
 {
-	struct sigaction act;
+	ft_printf("\n\033[1;32m  ███╗   ███╗██╗███╗   ");
+	ft_printf("██╗██╗████████╗ █████╗ ██╗     ██╗ ██╗\n");
+	ft_printf("  ████╗ ████║██║████╗  ██║██║╚══");
+	ft_printf("██╔══╝██╔══██╗██║     ██║██╔╝\n");
+	ft_printf("  ██╔████╔██║██║██╔██╗ ██║██║   ██║  ");
+	ft_printf(" ███████║██║     ███╔╝ \n");
+	ft_printf("  ██║╚██╔╝██║██║██║╚██╗██║██║   ");
+	ft_printf("██║   ██╔══██║██║     ██║██╗ \n");
+	ft_printf("  ██║ ╚═╝ ██║██║██║ ╚████║██║   ██");
+	ft_printf("║   ██║  ██║███████╗██╔═██╗\n");
+	ft_printf("  ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝   ");
+	ft_printf("╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝ ╚═╝\n");
+	ft_printf("       ═════════════════ \033[1;35mpid = %d", getpid());
+	ft_printf(" \033[1;32m═════════════════\033[0m\n");
+}
+
+int	main(void)
+{
+	struct sigaction	act;
 
 	act.sa_flags = SA_SIGINFO;
-    act.sa_sigaction = signal_handler;
+	sigemptyset(&act.sa_mask);
+	sigaddset(&act.sa_mask, SIGUSR1);
+	sigaddset(&act.sa_mask, SIGUSR2);
+	act.sa_sigaction = signal_handler;
 	sigaction(SIGUSR1, &act, NULL);
 	sigaction(SIGUSR2, &act, NULL);
-	ft_printf("\n\033[1;32m  ███╗   ███╗██╗███╗   ██╗██╗████████╗ █████╗ ██╗     ██╗ ██╗\n");
-  	ft_printf("  ████╗ ████║██║████╗  ██║██║╚══██╔══╝██╔══██╗██║     ██║██╔╝\n");
-	ft_printf("  ██╔████╔██║██║██╔██╗ ██║██║   ██║   ███████║██║     ███╔╝ \n");
-	ft_printf("  ██║╚██╔╝██║██║██║╚██╗██║██║   ██║   ██╔══██║██║     ██║██╗ \n");
-	ft_printf("  ██║ ╚═╝ ██║██║██║ ╚████║██║   ██║   ██║  ██║███████╗██╔═██╗\n");
-	ft_printf("  ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝ ╚═╝\n");
-	ft_printf("       ═════════════════ \033[1;35mpid = %d \033[1;32m═════════════════\033[0m\n", getpid());
+	makefile_str();
 	while (1)
 		pause();
-    return 0;
+	return (0);
 }

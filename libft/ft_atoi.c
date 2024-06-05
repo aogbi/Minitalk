@@ -11,7 +11,17 @@
 /* ************************************************************************** */
 
 #include "libft.h"
-#include <stdio.h>
+
+int	is_spaces(const char *nptr)
+{
+	while (*nptr)
+	{
+		if (*nptr != ' ')
+			return (0);
+		nptr++;
+	}
+	return (1);
+}
 
 int	ft_atoi(const char *nptr)
 {
@@ -34,7 +44,7 @@ int	ft_atoi(const char *nptr)
 		result *= 10;
 		result += (*nptr++) - '0';
 	}
-	if (*(nptr - 1) == '-' || *(nptr - 1) == '+' || *nptr)
+	if (!is_spaces(nptr) || *(nptr - 1) == '-' || *(nptr - 1) == '+')
 		return (-1);
 	result *= signal;
 	if ((ssize_t)result > INT_MAX || (ssize_t)result < INT_MIN)
